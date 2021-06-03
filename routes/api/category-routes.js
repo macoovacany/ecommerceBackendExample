@@ -8,8 +8,8 @@ const { Category, Product } = require('../../models');
 router.get('/', async (req, res) => {
   try {
     // find all categories
-    const CategoryData = await Category.findAll( {
-    //   // be sure to include its associated Products
+    const CategoryData = await Category.findAll({
+      //   // be sure to include its associated Products
       include: [{ model: Product }],
     });
     res.status(200).json(CategoryData);
@@ -27,6 +27,12 @@ router.get('/:id', async (req, res) => {
       // be sure to include its associated Products
       include: [{ model: Product }],
     });
+
+    if (!CategoryData) {
+      res.status(404).json({ message: 'No category found with that id!' });
+      return;
+    }
+
     res.status(200).json(CategoryData);
   } catch (err) {
     res.status(500).json(err);
@@ -47,10 +53,12 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   // update a category by its `id` value
   try {
-    const CategoryData = await Category.update(
-        {category_name: req.body.category_name},
-        {where: req.params.id}
-    );
+
+    const CategoryData = await Category.update(req.body, {
+      where: {
+        id: req.params.id,
+      },
+    });
 
     if (!CategoryData) {
       res.status(404).json({ message: 'No category found with that id!' });
